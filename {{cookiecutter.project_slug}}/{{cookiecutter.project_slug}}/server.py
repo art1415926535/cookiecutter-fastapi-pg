@@ -25,10 +25,15 @@ def get_application(
     if settings is None:
         settings = ServiceSettings()
 
+    docs_enabled = settings.docs_enabled
     application = FastAPI(
         title=settings.app_title,
         version=settings.app_version,
         debug=settings.fastapi_debug,
+        openapi_url=settings.docs_openapi_url if docs_enabled else None,
+        docs_url=settings.docs_url if docs_enabled else None,
+        redoc_url=settings.docs_redoc_url if docs_enabled else None,
+        openapi_prefix=settings.docs_openapi_prefix,
     )
 
     if settings.prometheus_enabled:

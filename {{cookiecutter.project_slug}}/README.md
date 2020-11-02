@@ -35,8 +35,8 @@ LOG_TIME_ISO_FORMAT=true
 LOG_UTC=false
 
 UVICORN_ACCESS_LOG=true
-
 FASTAPI_DEBUG=true
+DOCS_ENABLED=true
 
 POSTGRES_PASSWORD=mysecretpassword
 PG_DSN=postgresql://postgres:${POSTGRES_PASSWORD}@127.0.0.1:5432/postgres
