@@ -43,7 +43,7 @@ class ListUsers(DatabaseUseCase):
 class CreateUser(DatabaseUseCase):
     EMAIL_DUPLICATE_ERR: Final[
         str
-    ] = 'duplicate key value violates unique constraint "ix__user__email"'
+    ] = 'duplicate key value violates unique constraint "ix__users__email"'
 
     async def __call__(self, user_create: schemas.UserCreate) -> schemas.User:
         query = await self._build_query(user_create)
