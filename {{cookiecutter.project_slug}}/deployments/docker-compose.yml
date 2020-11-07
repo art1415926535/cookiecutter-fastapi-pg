@@ -7,6 +7,7 @@ services:
       dockerfile: ./build/Dockerfile
     ports:
       - "{{cookiecutter.default_port}}:{{cookiecutter.default_port}}"
+    command: [ "serve" ]
   db:
     image: postgres:13.0
     env_file:

@@ -9,12 +9,8 @@ services:
         REQUIREMENTS_FILE: dev.txt
     volumes:
       - .:/app
-    ports:
-      - "{{cookiecutter.default_port}}:{{cookiecutter.default_port}}"
-    command: [ "serve", "-r" ]
+    command: [ "test" ]
   db:
     image: postgres:13.0
     env_file:
       - .env
-    ports:
-      - "{{cookiecutter.published_db_port}}:5432"

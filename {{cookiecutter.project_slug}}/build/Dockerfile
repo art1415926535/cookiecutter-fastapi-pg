@@ -1,7 +1,9 @@
 FROM python:3.8.6-buster
 
-ARG GIT_HASH
-ENV GIT_HASH=${GIT_HASH:-dev}
+ARG GIT_HASH=dev
+ENV GIT_HASH=$GIT_HASH
+
+ARG REQUIREMENTS_FILE=base.txt
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
@@ -14,12 +16,11 @@ WORKDIR /app
 RUN useradd -m -r user && \
     chown user /app
 
-ENV REQUIREMENTS_FILE=${REQUIREMENTS_FILE:-base.txt}
-COPY requirements/${REQUIREMENTS_FILE} requirements/${REQUIREMENTS_FILE}
-RUN pip-sync requirements/${REQUIREMENTS_FILE}
+COPY requirements/$REQUIREMENTS_FILE requirements/$REQUIREMENTS_FILE
+RUN pip-sync requirements/$REQUIREMENTS_FILE
 
 COPY . .
 
 USER user
 
-ENTRYPOINT ["python", "-m", "{{cookiecutter.project_slug}}", "serve"]
+ENTRYPOINT ["python", "-m", "{{cookiecutter.project_slug}}"]

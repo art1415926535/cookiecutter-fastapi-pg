@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+      args:
+        REQUIREMENTS_FILE: dev.txt
+    environment:
+      PG_DSN: "postgres://user:pass@localhost:5432/foobar"
+    volumes:
+      - .:/app
+    command: [ "lint" ]
