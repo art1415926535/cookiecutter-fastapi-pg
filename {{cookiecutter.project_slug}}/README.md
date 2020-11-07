@@ -40,7 +40,7 @@ FASTAPI_DEBUG=true
 DOCS_ENABLED=true
 
 POSTGRES_PASSWORD=mysecretpassword
-PG_DSN=postgresql://postgres:${POSTGRES_PASSWORD}@127.0.0.1:5432/postgres
+PG_DSN=postgresql://postgres:${POSTGRES_PASSWORD}@127.0.0.1:{{cookiecutter.published_db_port}}/postgres
 ```
 
 4. Create database:
