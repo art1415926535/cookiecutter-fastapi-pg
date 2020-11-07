@@ -17,6 +17,7 @@ pip-sync requirements/base.txt
 
 # Development
 ## Setup
+### Local
 1. Install pip tools:
 ```
 pip install pip-tools
@@ -44,7 +45,28 @@ PG_DSN=postgresql://postgres:${POSTGRES_PASSWORD}@127.0.0.1:5432/postgres
 
 4. Create database:
 ```
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose -f deployments/docker-compose.dev.yml --project-directory . up -d db
+```
+
+### Docker
+1. Add `.env` file. Example:
+```
+LOG_LEVEL=debug
+LOG_TYPE=console
+LOG_TIME_ISO_FORMAT=true
+LOG_UTC=false
+
+UVICORN_ACCESS_LOG=true
+FASTAPI_DEBUG=true
+DOCS_ENABLED=true
+
+POSTGRES_PASSWORD=mysecretpassword
+PG_DSN=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+```
+
+2. Run project:
+```
+docker-compose -f deployments/docker-compose.dev.yml --project-directory . up
 ```
 
 ## Update requirements

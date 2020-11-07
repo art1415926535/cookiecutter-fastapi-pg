@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+    ports:
+      - "{{cookiecutter.default_port}}:{{cookiecutter.default_port}}"
+  db:
+    image: postgres:13.0
+    env_file:
+      - .env
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
