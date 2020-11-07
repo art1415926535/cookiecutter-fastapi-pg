@@ -32,7 +32,7 @@ def cli(ctx):
 
 
 @cli.command()
-@click.option("--host", "-h", default="127.0.0.1", help="host")
+@click.option("--host", "-h", default="0.0.0.0", help="host")
 @click.option("--port", "-p", default={{cookiecutter.default_port}}, help="port")
 @click.option("--reload", "-r", is_flag=True, help="enable auto-reload")
 @click.pass_context
