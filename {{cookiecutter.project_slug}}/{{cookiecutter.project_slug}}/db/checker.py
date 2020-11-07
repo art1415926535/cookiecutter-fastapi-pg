@@ -13,9 +13,7 @@ async def check_db_connection(db: Database) -> bool:
     msg = "db connection"
 
     try:
-        result = await asyncio.wait_for(
-            db.fetch_val("SELECT 1 v;", None, "v"), 0.5
-        )
+        result = await asyncio.wait_for(db.fetch_val("SELECT 1;"), 0.1)
         if result == 1:
             log.info(msg, ok=True)
             return True
