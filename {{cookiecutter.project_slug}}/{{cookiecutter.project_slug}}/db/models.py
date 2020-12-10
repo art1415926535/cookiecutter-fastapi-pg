@@ -1,5 +1,5 @@
 import sqlalchemy
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Column, Integer, String
 
 
 convention = {
@@ -16,14 +16,11 @@ convention = {
 }
 metadata = sqlalchemy.MetaData(naming_convention=convention)
 
-users = sqlalchemy.Table(
-    "users",
+items = sqlalchemy.Table(
+    "items",
     metadata,
     Column("id", Integer, primary_key=True, index=True),
-    Column("first_name", String),
-    Column("last_name", String),
-    Column("email", String, unique=True, index=True, nullable=False),
-    Column("password", String, nullable=False),
-    Column("is_active", Boolean, server_default="true"),
-    Column("is_superuser", Boolean, server_default="false"),
+    Column("title", String, nullable=False),
+    Column("description", String),
+    Column("price", Integer, nullable=False),
 )

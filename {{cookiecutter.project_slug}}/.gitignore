@@ -1,4 +1,3 @@
-### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -17,3 +16,6 @@ dmypy.json
 .venv
 env/
 venv/
+
+# IDE
+.idea/

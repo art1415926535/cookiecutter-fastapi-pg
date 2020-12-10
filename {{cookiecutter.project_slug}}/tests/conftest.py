@@ -5,7 +5,10 @@ from urllib.parse import urlparse
 import asgi_lifespan
 import fastapi
 import httpx
+import jose.jwt
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from databases import Database
 
 from {{cookiecutter.project_slug}}.db import connection
@@ -21,8 +24,36 @@ alembic_path = str(Path(module, "db", "alembic"))
 
 
 @pytest.fixture(scope="session")
-def base_service_settings() -> ServiceSettings:
-    return ServiceSettings()
+def private_key():
+    return rsa.generate_private_key(public_exponent=65537, key_size=512)
+
+
+@pytest.fixture(scope="session")
+def private_key_str(private_key) -> str:
+    return private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    ).decode()
+
+
+@pytest.fixture(scope="session")
+def base_service_settings(private_key) -> ServiceSettings:
+    settings = ServiceSettings()
+
+    public_key = (
+        private_key.public_key()
+        .public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+        .decode()
+    )
+    settings.jwt_secret = public_key
+    settings.jwt_algorithm = "RS256"
+    settings.jwt_audience = "account"
+
+    return settings
 
 
 @pytest.fixture(scope="session")
@@ -90,11 +121,21 @@ async def app(
 
 
 @pytest.fixture
-@pytest.mark.asyncio
-async def client_builder(
+def client_builder(
     app: fastapi.FastAPI,
+    private_key_str: str,
+    service_settings: ServiceSettings,
 ) -> Callable[..., httpx.AsyncClient]:
-    def builder(**kwargs) -> httpx.AsyncClient:
+    def builder(jwt_payload=None, **kwargs) -> httpx.AsyncClient:
+        if jwt_payload:
+            jwt = jose.jwt.encode(
+                jwt_payload,
+                private_key_str,
+                algorithm=service_settings.jwt_algorithm,
+            )
+            kwargs.setdefault("headers", {})
+            kwargs["headers"].update({"Authorization": f"Bearer {jwt}"})
+
         client = httpx.AsyncClient(app=app, base_url="http://test", **kwargs)
         return client
 
@@ -103,8 +144,6 @@ async def client_builder(
 
 @pytest.fixture
 @pytest.mark.asyncio
-async def client(
-    client_builder: Callable[..., httpx.AsyncClient]
-) -> AsyncGenerator[httpx.AsyncClient, None]:
+async def client(client_builder: Callable[..., httpx.AsyncClient]):
     async with client_builder() as c:
         yield c

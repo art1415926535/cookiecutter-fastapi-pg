@@ -1,5 +1,6 @@
-from .logging_setup import StructlogHandler
-from .main import configure, get_logger
+from . import configure  # noqa
+from .configure import LOG_LEVEL
+from .get_logger import get_logger
 
 
-__all__ = ["configure", "get_logger", "StructlogHandler"]
+__all__ = ["get_logger", "LOG_LEVEL"]

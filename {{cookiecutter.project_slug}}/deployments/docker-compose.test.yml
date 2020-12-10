@@ -7,10 +7,12 @@ services:
       dockerfile: ./build/Dockerfile
       args:
         REQUIREMENTS_FILE: dev.txt
-    volumes:
-      - .:/app
-    command: [ "test" ]
+    environment:
+      - LOG_TYPE=console
+      - LOG_LEVEL=info
+      - PG_DSN=postgresql://postgres:mysecretpassword@db:5432/postgres
+    command: [ "test", "--wait-for-db", "postgresql://postgres:mysecretpassword@db:5432/postgres" ]
   db:
     image: postgres:13.0
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword

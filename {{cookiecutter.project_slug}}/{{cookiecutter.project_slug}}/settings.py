@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Optional
 
 from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn
 
@@ -17,6 +17,7 @@ class ServiceSettings(BaseSettings):
     # FastAPI
     fastapi_debug: bool = False
     fastapi_admin_route_prefix: str = "admin"
+    fastapi_root_path: str = ""
 
     # Docs
     docs_enabled: bool = False
@@ -24,6 +25,7 @@ class ServiceSettings(BaseSettings):
     docs_openapi_prefix: str = ""
     docs_openapi_url: str = "/openapi.json"
     docs_redoc_url: str = "/redoc"
+    docs_admin_route_include_in_schema: bool = False
 
     # PostgreSQL
     pg_dsn: PostgresDsn  # e.g.: 'postgres://user:pass@localhost:5432/foobar'
@@ -32,8 +34,17 @@ class ServiceSettings(BaseSettings):
     pg_application_name: str = SERVICE_NAME
     pg_command_timeout: Optional[float] = None
 
+    # JWT
+    jwt_secret: str = ""
+    jwt_algorithm: str = "RS256"
+    jwt_audience: Optional[str] = None
+
+    # Keycloak
+    keycloak_url: Optional[str]
+    keycloak_realm: Optional[str]
+
     # Prometheus
-    prometheus_enabled: bool = False
+    prometheus_enabled: bool = True
     prometheus_group_paths: bool = True
     prometheus_app_name: str = SERVICE_NAME
     prometheus_prefix: str = __author__
@@ -41,26 +52,6 @@ class ServiceSettings(BaseSettings):
     # Sentry
     sentry_dsn: Optional[AnyHttpUrl] = None
     sentry_traces_sample_rate: float = 1.0
-
-    class Config:
-        env_file = ".env"
-        validate_assignment = True
-
-
-class LoggerSettings(BaseSettings):
-    """Logger settings."""
-
-    log_level: Literal[
-        "critical", "error", "warning", "info", "debug"
-    ] = "error"
-
-    # kv - structlog.processors.KeyValueRenderer
-    # json - structlog.processors.JSONRenderer
-    # console - structlog.dev.ConsoleRenderer
-    log_type: Literal["kv", "json", "console"] = "kv"
-
-    log_utc: bool = True
-    log_time_iso_format: bool = False
 
     class Config:
         env_file = ".env"

@@ -1,25 +1,30 @@
-import prometheus_client
-from passlib.context import CryptContext
+from typing import Optional, Protocol
+
+import jose.jwt
+
+from {{cookiecutter.project_slug}}.logger import get_logger
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+log = get_logger()
 
 
-PASSWORD_VERIFICATION = prometheus_client.Summary(
-    "{{cookiecutter.author_name}}_password_verification_seconds",
-    "Time spent on password verification",
-)
-PASSWORD_HASHING = prometheus_client.Summary(
-    "{{cookiecutter.author_name}}_password_hashing_seconds",
-    "Time spent hashing password",
-)
+class _JWTSettings(Protocol):
+    jwt_secret: str
+    jwt_algorithm: str
+    jwt_audience: Optional[str]
 
 
-@PASSWORD_VERIFICATION.time()
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+def decode_jwt(jwt: str, jwt_settings: _JWTSettings) -> Optional[dict]:
+    try:
+        return jose.jwt.decode(
+            token=jwt,
+            key=jwt_settings.jwt_secret,
+            algorithms=jwt_settings.jwt_algorithm,
+            audience=jwt_settings.jwt_audience,
+        )
+    except jose.ExpiredSignatureError:
+        log.warning("user jwt with expired signature")
+    except jose.JOSEError as e:
+        log.exception("jose error", jwt=jwt, exc_info=e)
 
-
-@PASSWORD_HASHING.time()
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    return None

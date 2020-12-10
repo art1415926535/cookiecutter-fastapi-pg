@@ -2,18 +2,20 @@
 
 
 # Production
-1. Set up environment variables.
+1. Set up environment variables:
+```
+PG_DSN=postgresql://...
 
-2. Install pip tools:
-```
-pip install pip-tools
+JWT_SECRET="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+JWT_AUDIENCE=account
+
+KEYCLOAK_URL=https://.../
+KEYCLOAK_REALM=...
 ```
 
-3. Install requirements:
-```
-pip-sync requirements/base.txt
-```
+> replace ... with actual data
 
+2. Run containers.
 
 # Development
 ## Setup
@@ -41,9 +43,15 @@ DOCS_ENABLED=true
 
 POSTGRES_PASSWORD=mysecretpassword
 PG_DSN=postgresql://postgres:${POSTGRES_PASSWORD}@127.0.0.1:{{cookiecutter.published_db_port}}/postgres
+
+JWT_SECRET="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+JWT_AUDIENCE=account
+
+KEYCLOAK_URL=https://.../
+KEYCLOAK_REALM=...
 ```
 
-4. Create database:
+4. Run database:
 ```
 docker-compose -f deployments/docker-compose.dev.yml --project-directory . up -d db
 ```
@@ -62,6 +70,12 @@ DOCS_ENABLED=true
 
 POSTGRES_PASSWORD=mysecretpassword
 PG_DSN=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+
+JWT_SECRET="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+JWT_AUDIENCE=account
+
+KEYCLOAK_URL=https://.../
+KEYCLOAK_REALM=...
 ```
 
 2. Run project:
@@ -75,7 +89,7 @@ docker-compose -f deployments/docker-compose.dev.yml --project-directory . up
 2. Run:
 ```
 pip-compile --generate-hashes --output-file requirements/base.txt requirements/base.in
-pip-compile --generate-hashes --output-file requirements/dev.txt requirements/dev.in
+pip-compile --output-file requirements/dev.txt requirements/dev.in
 ```
 
 3. Update your dev environment: `pip-sync requirements/dev.txt`

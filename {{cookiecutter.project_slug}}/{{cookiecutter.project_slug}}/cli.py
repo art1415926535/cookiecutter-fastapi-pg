@@ -7,7 +7,9 @@ import uvicorn
 
 from {{cookiecutter.project_slug}} import logger
 from {{cookiecutter.project_slug}}.db.alembic import migration_manager
-from {{cookiecutter.project_slug}}.settings import LoggerSettings, ServiceSettings
+from {{cookiecutter.project_slug}}.db.wait_for_db import sync_wait_for_db
+from {{cookiecutter.project_slug}}.logger import LOG_LEVEL
+from {{cookiecutter.project_slug}}.settings import ServiceSettings
 
 
 log = logger.get_logger()
@@ -23,12 +25,7 @@ def cli(ctx):
     ctx.ensure_object(dict)
 
     service_settings = ServiceSettings()
-    logger_settings = LoggerSettings()
-
     ctx.obj["service_settings"] = service_settings
-    ctx.obj["logger_settings"] = logger_settings
-
-    logger.configure(logger_settings)
 
 
 @cli.command()
@@ -41,14 +38,13 @@ def serve(ctx, host: str, port: int, reload: bool):
     log.info("Click: serve", host=host, port=port, reload=reload)
 
     service_settings: ServiceSettings = ctx.obj["service_settings"]
-    logger_settings: LoggerSettings = ctx.obj["logger_settings"]
 
     uvicorn.run(
         app,
         host=host,
         port=port,
         log_config=None,
-        log_level=logger_settings.log_level,
+        log_level=LOG_LEVEL,
         access_log=service_settings.uvicorn_access_log,
         debug=service_settings.fastapi_debug,
         reload=reload,
@@ -101,7 +97,7 @@ def migrate(ctx, action: str, dsn: Optional[str], revision: str, sql: bool):
 
 def _log_subprocess_output(tool, pipe):
     for line in iter(pipe.readline, b""):  # b'\n'-separated lines
-        log.debug(line.decode().replace("\n", "\t"), tool=tool)
+        log.info(line.decode().replace("\n", "\t"), tool=tool)
 
 
 @cli.command()
@@ -148,11 +144,14 @@ def lint():
 
 
 @cli.command()
-def test():
+@click.option("--wait-for-db", help="wait db")
+def test(wait_for_db: Optional[str] = None):
     """Run tests."""
     import pytest
 
-    pytest.main(["tests"])
+    if wait_for_db:
+        sync_wait_for_db(wait_for_db, tries=15, delay=2)
+    exit(pytest.main(["tests"]))
 
 
 if __name__ == "__main__":

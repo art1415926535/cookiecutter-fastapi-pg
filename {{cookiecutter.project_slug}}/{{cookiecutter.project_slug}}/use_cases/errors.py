@@ -5,10 +5,13 @@ from {{cookiecutter.project_slug}}.logger import get_logger
 
 log = get_logger()
 
-LogLevels = Literal["critical", "error", "warning", "info", "debug"]
+LogLevels = Literal[
+    "critical", "exception", "error", "warning", "info", "debug"
+]
 
 _loggers: Dict[str, Callable[..., None]] = {
     "critical": log.critical,
+    "exception": log.exception,
     "error": log.error,
     "warning": log.warning,
     "info": log.info,
@@ -21,8 +24,9 @@ class _LoggedError(Exception):
 
     def __init__(
         self,
-        message: str,
-        loc: List[str] = None,
+        msg: str,
+        user_msg: Optional[str] = None,
+        loc: Optional[List[str]] = None,
         log_level: Optional[LogLevels] = "error",
         **kwargs,
     ):
@@ -30,13 +34,27 @@ class _LoggedError(Exception):
             loc = []
         self.loc: List[str] = loc
 
+        self.user_msg: Optional[str] = user_msg
+
         if log_level is not None:
-            _loggers[log_level](message, **kwargs)
+            _loggers[log_level](msg, **kwargs)
 
-        super().__init__(message)
+        super().__init__(msg)
 
 
-class UseCaseError(_LoggedError):
-    """User-friendly error message."""
+class Error(_LoggedError):
+    """Base error."""
+
+    pass
+
+
+class PermissionDenied(_LoggedError):
+    """Permission error."""
+
+    pass
+
+
+class NotFoundError(_LoggedError):
+    """NotFound error."""
 
     pass
